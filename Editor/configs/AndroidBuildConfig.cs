@@ -9,12 +9,17 @@ namespace Loju.Build
         AppBundle
     }
 
+    /// Build config for Android, handles build output differently depending on build type. For debug it generates a single APK that's
+    /// installed and run on an attached device, for release or beta it creates multiple APKs or an AppBundle that can be submitted to the
+    /// play store.
     public class AndroidBuildConfig : BuildConfig
     {
 
+        public AndroidArchitecture debugArchitecture = AndroidArchitecture.ARMv7;
+        public AndroidArchitecture releaseArchitecture = AndroidArchitecture.All;
         public AndroidReleaseBuildType releaseBuildType = AndroidReleaseBuildType.AppBundle;
 
-        public AndroidBuildConfig(BuildTarget target, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(target, type, platformName, appendToPath, defines)
+        public AndroidBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.Android, type, platformName, appendToPath, defines)
         {
 
         }
@@ -27,12 +32,12 @@ namespace Loju.Build
             {
                 EditorUserBuildSettings.buildAppBundle = false;
                 EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
-                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7;
+                PlayerSettings.Android.targetArchitectures = debugArchitecture;
                 PlayerSettings.Android.buildApkPerCpuArchitecture = false;
             }
             else
             {
-                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.All;
+                PlayerSettings.Android.targetArchitectures = releaseArchitecture;
 
                 if (releaseBuildType == AndroidReleaseBuildType.ProjectExport)
                 {

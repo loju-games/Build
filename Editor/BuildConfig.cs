@@ -12,11 +12,11 @@ namespace Loju.Build
     public class BuildConfig
     {
 
-        public readonly BuildTarget target;
-        public readonly BuildType type;
-        public readonly string platformName;
-        public readonly BuildCompilationDefines defines;
-        public readonly string appendToPath;
+        public BuildTarget target = BuildTarget.iOS;
+        public BuildType type = BuildType.Debug;
+        public string platformName = null;
+        public BuildCompilationDefines defines = null;
+        public string appendToPath = null;
 
         public BuildConfig(BuildTarget target, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null)
         {
@@ -27,12 +27,19 @@ namespace Loju.Build
             this.appendToPath = appendToPath;
         }
 
+        public virtual string GetFinalBuildPath(string directory)
+        {
+            if (!string.IsNullOrEmpty(appendToPath)) directory = System.IO.Path.Combine(directory, appendToPath);
+
+            return directory;
+        }
+
         public virtual void OnPreBuild(ref BuildOptions options)
         {
             EditorUserBuildSettings.development = type == BuildType.Debug;
         }
 
-        public virtual void OnPostBuild()
+        public virtual void OnPostBuild(string pathToBuild)
         {
 
         }

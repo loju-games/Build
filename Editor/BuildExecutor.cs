@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Build.Reporting;
 using System.IO;
 
 namespace Loju.Build
@@ -8,10 +9,10 @@ namespace Loju.Build
     public static class BuildExecutor
     {
 
-        public static void Build(BuildConfig config)
+        public static BuildReport Build(BuildConfig config, bool replaceScriptCompilationDefines = false, bool incrementBuildNumber = false)
         {
-            string location = GetBuildLocation(config.platformName, config.type);
-            if (!string.IsNullOrEmpty(config.appendToPath)) location = Path.Combine(location, config.appendToPath);
+            string location = GetBuildPath(config.platformName, config.type);
+            location = config.GetFinalBuildPath(location);
 
             BuildOptions options = BuildOptions.None;
             BuildTargetGroup buildGroup = BuildPipeline.GetBuildTargetGroup(config.target);
@@ -19,7 +20,7 @@ namespace Loju.Build
 
             // setup compilation defines
             BuildCompilationDefines restoreDefines = new BuildCompilationDefines(PlayerSettings.GetScriptingDefineSymbolsForGroup(buildGroup));
-            BuildCompilationDefines currentDefines = restoreDefines.Clone();
+            BuildCompilationDefines currentDefines = replaceScriptCompilationDefines ? new BuildCompilationDefines() : restoreDefines.Clone();
             currentDefines.AddAll(config.defines);
 
             switch (config.type)
@@ -37,15 +38,18 @@ namespace Loju.Build
 
             // build
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, currentDefines.ToString());
-            BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, location, config.target, options);
+            BuildReport report = BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, location, config.target, options);
 
             // cleanup
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, restoreDefines.ToString());
 
-            config.OnPostBuild();
+            config.OnPostBuild(location);
+            if (incrementBuildNumber) UpdateBuildNumber(config.target);
+
+            return report;
         }
 
-        public static void UpdateBuildNumber(BuildTarget target)
+        private static void UpdateBuildNumber(BuildTarget target)
         {
             // update internal build numbers
             if (target == BuildTarget.iOS)
@@ -75,7 +79,7 @@ namespace Loju.Build
             File.WriteAllText(Path.Combine(Application.streamingAssetsPath, "version.json"), JsonUtility.ToJson(info));
         }
 
-        private static string GetBuildLocation(string platform, BuildType type)
+        private static string GetBuildPath(string platform, BuildType type)
         {
             string location = "Builds";
 
