@@ -2,8 +2,9 @@ using UnityEditor;
 
 namespace Loju.Build
 {
-    public enum AndroidReleaseBuildType
+    public enum AndroidAPKBuildType
     {
+        SingleAPK,
         ProjectExport,
         SplitAPK,
         AppBundle
@@ -15,9 +16,8 @@ namespace Loju.Build
     public class AndroidBuildConfig : BuildConfig
     {
 
-        public AndroidArchitecture debugArchitecture = AndroidArchitecture.ARMv7;
-        public AndroidArchitecture releaseArchitecture = AndroidArchitecture.All;
-        public AndroidReleaseBuildType releaseBuildType = AndroidReleaseBuildType.AppBundle;
+        public AndroidArchitecture buildArchitecture = AndroidArchitecture.All;
+        public AndroidAPKBuildType apkBuildType = AndroidAPKBuildType.SingleAPK;
 
         public AndroidBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.Android, type, platformName, appendToPath, defines)
         {
@@ -28,35 +28,31 @@ namespace Loju.Build
         {
             base.OnPreBuild(ref options);
 
-            if (type == BuildType.Debug)
+            PlayerSettings.Android.targetArchitectures = buildArchitecture;
+
+            if (apkBuildType == AndroidAPKBuildType.SingleAPK)
             {
                 EditorUserBuildSettings.buildAppBundle = false;
                 EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
-                PlayerSettings.Android.targetArchitectures = debugArchitecture;
                 PlayerSettings.Android.buildApkPerCpuArchitecture = false;
             }
-            else
+            else if (apkBuildType == AndroidAPKBuildType.ProjectExport)
             {
-                PlayerSettings.Android.targetArchitectures = releaseArchitecture;
-
-                if (releaseBuildType == AndroidReleaseBuildType.ProjectExport)
-                {
-                    EditorUserBuildSettings.buildAppBundle = false;
-                    EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
-                    PlayerSettings.Android.buildApkPerCpuArchitecture = false;
-                }
-                else if (releaseBuildType == AndroidReleaseBuildType.AppBundle)
-                {
-                    EditorUserBuildSettings.buildAppBundle = true;
-                    EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
-                    PlayerSettings.Android.buildApkPerCpuArchitecture = false;
-                }
-                else if (releaseBuildType == AndroidReleaseBuildType.SplitAPK)
-                {
-                    EditorUserBuildSettings.buildAppBundle = false;
-                    EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
-                    PlayerSettings.Android.buildApkPerCpuArchitecture = true;
-                }
+                EditorUserBuildSettings.buildAppBundle = false;
+                EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
+                PlayerSettings.Android.buildApkPerCpuArchitecture = false;
+            }
+            else if (apkBuildType == AndroidAPKBuildType.AppBundle)
+            {
+                EditorUserBuildSettings.buildAppBundle = true;
+                EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
+                PlayerSettings.Android.buildApkPerCpuArchitecture = false;
+            }
+            else if (apkBuildType == AndroidAPKBuildType.SplitAPK)
+            {
+                EditorUserBuildSettings.buildAppBundle = false;
+                EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
+                PlayerSettings.Android.buildApkPerCpuArchitecture = true;
             }
         }
 

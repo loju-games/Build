@@ -34,7 +34,7 @@ namespace Loju.Build
             config.OnPreBuild(ref options);
 
             if (config.type == BuildType.Debug || config.target == BuildTarget.iOS) options |= BuildOptions.AutoRunPlayer;
-            if (config.type == BuildType.Debug && config.target != BuildTarget.Android) options |= BuildOptions.Development;
+            if (config.type == BuildType.Debug) options |= BuildOptions.Development;
 
             // build
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, currentDefines.ToString());
