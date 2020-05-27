@@ -9,12 +9,16 @@ namespace Loju.Build
     public static class BuildExecutor
     {
 
-        public static BuildReport Build(BuildConfig config, bool replaceScriptCompilationDefines = false, bool incrementBuildNumber = false)
+        public static string GetFinalBuildPath(BuildConfig config)
         {
             string location = GetBuildPath(config.platformName, config.type);
-            location = config.GetFinalBuildPath(location);
+            return config.GetFinalBuildPath(location);
+        }
 
-            BuildOptions options = BuildOptions.None;
+        public static BuildReport Build(BuildConfig config, BuildOptions options, bool replaceScriptCompilationDefines = false, bool incrementBuildNumber = false)
+        {
+            string location = GetFinalBuildPath(config);
+
             BuildTargetGroup buildGroup = BuildPipeline.GetBuildTargetGroup(config.target);
             SaveVersion(config);
 
@@ -38,7 +42,7 @@ namespace Loju.Build
 
             // build
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, currentDefines.ToString());
-            BuildReport report = BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, location, config.target, options);
+            BuildReport report = BuildPipeline.BuildPlayer(config.scenes, location, config.target, options);
 
             // cleanup
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, restoreDefines.ToString());
@@ -60,6 +64,10 @@ namespace Loju.Build
             {
                 PlayerSettings.Android.bundleVersionCode = PlayerSettings.Android.bundleVersionCode + 1;
             }
+            else if (target == BuildTarget.StandaloneOSX)
+            {
+                PlayerSettings.macOS.buildNumber = (int.Parse(PlayerSettings.macOS.buildNumber) + 1).ToString();
+            }
         }
 
         private static void SaveVersion(BuildConfig config)
@@ -73,6 +81,10 @@ namespace Loju.Build
             else if (config.target == BuildTarget.Android)
             {
                 buildNumber = PlayerSettings.Android.bundleVersionCode.ToString();
+            }
+            else if (config.target == BuildTarget.StandaloneOSX)
+            {
+                buildNumber = PlayerSettings.macOS.buildNumber;
             }
 
             BuildInfo info = new BuildInfo(Application.version, buildNumber, config.platformName);

@@ -17,14 +17,21 @@ namespace Loju.Build
         public string platformName = null;
         public BuildCompilationDefines defines = null;
         public string appendToPath = null;
+        public string[] scenes = null;
 
-        public BuildConfig(BuildTarget target, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null)
+        public BuildConfig(BuildTarget target, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : this(target, EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes), type, platformName, appendToPath, defines)
+        {
+
+        }
+
+        public BuildConfig(BuildTarget target, string[] scenes, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null)
         {
             this.target = target;
             this.type = type;
             this.platformName = platformName;
             this.defines = defines != null ? defines.Clone() : new BuildCompilationDefines();
             this.appendToPath = appendToPath;
+            this.scenes = scenes;
         }
 
         public virtual string GetFinalBuildPath(string directory)
