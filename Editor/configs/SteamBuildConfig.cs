@@ -88,6 +88,7 @@ namespace Loju.Build
 #else
             string pathToCmd = Path.Combine(sdkPath, "tools/ContentBuilder/builder_osx/steamcmd.sh");
 #endif
+            string arguments = $"+login {username} {password} +run_app_build_http {appVDFPath} +quit";
 
             ProcessStartInfo startInfo = new ProcessStartInfo()
             {
@@ -97,13 +98,15 @@ namespace Loju.Build
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
-                Arguments = $"+login {username} {password} +run_app_build_http {appVDFPath} +quit"
+                Arguments = arguments
             };
 
             Process myProcess = new Process
             {
                 StartInfo = startInfo
             };
+
+            UnityEngine.Debug.LogFormat("{0} {1}", pathToCmd, arguments);
 
             myProcess.Start();
             string output = myProcess.StandardOutput.ReadToEnd();
