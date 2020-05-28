@@ -1,5 +1,7 @@
 using UnityEditor;
+#if UNITY_STANDALONE_OSX
 using UnityEditor.iOS.Xcode;
+#endif
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
@@ -36,6 +38,7 @@ namespace Loju.Build
         {
             if (base.type == BuildType.Debug) return;
 
+#if UNITY_STANDALONE_OSX
             string fileName = Path.GetFileName(pathToBuild);
             string applicationPath = Path.GetDirectoryName(pathToBuild);
 
@@ -99,6 +102,7 @@ namespace Loju.Build
             UnityEngine.Debug.Log(process.StandardOutput.ReadToEnd());
 
             process.WaitForExit();
+#endif
         }
 
         private static void FindPlugins(string pathToBuild, string fileName, List<string> results)
