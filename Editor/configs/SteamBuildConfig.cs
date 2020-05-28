@@ -81,6 +81,41 @@ namespace Loju.Build
             return depotFileName;
         }
 
+        public static void AuthorizeSteam(string sdkPath, string steamGuardCode)
+        {
+#if UNITY_EDITOR_WIN
+            string pathToCmd = Path.Combine(sdkPath, "tools/ContentBuilder/builder/steamcmd.exe");
+#else
+            string pathToCmd = Path.Combine(sdkPath, "tools/ContentBuilder/builder_osx/steamcmd.sh");
+#endif
+            string arguments = $"+set_steam_guard_code {steamGuardCode} +quit";
+
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
+                FileName = pathToCmd,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true,
+                Arguments = arguments
+            };
+
+            Process process = new Process
+            {
+                StartInfo = startInfo
+            };
+
+            UnityEngine.Debug.LogFormat("{0} {1}", pathToCmd, arguments);
+
+            process.Start();
+            process.WaitForExit();
+
+            string output = process.StandardOutput.ReadToEnd();
+            UnityEngine.Debug.Log(output);
+            process.Dispose();
+        }
+
         public static void PushToSteam(string sdkPath, string appVDFPath, string username, string password)
         {
 #if UNITY_EDITOR_WIN
@@ -101,17 +136,19 @@ namespace Loju.Build
                 Arguments = arguments
             };
 
-            Process myProcess = new Process
+            Process process = new Process
             {
                 StartInfo = startInfo
             };
 
             UnityEngine.Debug.LogFormat("{0} {1}", pathToCmd, arguments);
 
-            myProcess.Start();
-            string output = myProcess.StandardOutput.ReadToEnd();
+            process.Start();
+            process.WaitForExit();
+
+            string output = process.StandardOutput.ReadToEnd();
             UnityEngine.Debug.Log(output);
-            myProcess.WaitForExit();
+            process.Dispose();
         }
 
     }
