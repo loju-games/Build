@@ -50,8 +50,7 @@ namespace Loju.Build
             Directory.CreateDirectory(Path.Combine(outputPath, "content"));
             Directory.CreateDirectory(Path.Combine(outputPath, "output"));
 
-            string path = Path.Combine(outputPath, $"app_build_{appId}.vdf");
-            File.WriteAllText(path, stringBuilder.ToString());
+            File.WriteAllText(GetPathToAppVDF(outputPath, appId), stringBuilder.ToString());
         }
 
         private static string CreateDepotVDF(SteamBuildConfig config, string outputPath)
@@ -106,8 +105,6 @@ namespace Loju.Build
                 StartInfo = startInfo
             };
 
-            UnityEngine.Debug.LogFormat("{0} {1}", pathToCmd, arguments);
-
             process.Start();
             process.WaitForExit();
 
@@ -116,39 +113,49 @@ namespace Loju.Build
             process.Dispose();
         }
 
-        public static void PushToSteam(string sdkPath, string appVDFPath, string username, string password)
+        public static void PushToSteam(string sdkPath, string outputPath, string appId, string username, string password, bool execute = true)
         {
 #if UNITY_EDITOR_WIN
             string pathToCmd = Path.Combine(sdkPath, "tools/ContentBuilder/builder/steamcmd.exe");
 #else
             string pathToCmd = Path.Combine(sdkPath, "tools/ContentBuilder/builder_osx/steamcmd.sh");
 #endif
-            string arguments = $"+login {username} {password} +run_app_build_http {appVDFPath} +quit";
+            string arguments = $"+login {username} {password} +run_app_build_http {GetPathToAppVDF(outputPath, appId)} +quit";
 
-            ProcessStartInfo startInfo = new ProcessStartInfo()
+            if (execute)
             {
-                FileName = pathToCmd,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-                Arguments = arguments
-            };
+                ProcessStartInfo startInfo = new ProcessStartInfo()
+                {
+                    FileName = pathToCmd,
+                    UseShellExecute = false,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    Arguments = arguments
+                };
 
-            Process process = new Process
+                Process process = new Process
+                {
+                    StartInfo = startInfo
+                };
+
+                process.Start();
+                process.WaitForExit();
+
+                string output = process.StandardOutput.ReadToEnd();
+                UnityEngine.Debug.Log(output);
+                process.Dispose();
+            }
+            else
             {
-                StartInfo = startInfo
-            };
+                UnityEngine.Debug.LogFormat("{0} {1}", pathToCmd, arguments);
+            }
+        }
 
-            UnityEngine.Debug.LogFormat("{0} {1}", pathToCmd, arguments);
-
-            process.Start();
-            process.WaitForExit();
-
-            string output = process.StandardOutput.ReadToEnd();
-            UnityEngine.Debug.Log(output);
-            process.Dispose();
+        private static string GetPathToAppVDF(string outputPath, string appId)
+        {
+            return Path.Combine(outputPath, $"app_build_{appId}.vdf");
         }
 
     }
