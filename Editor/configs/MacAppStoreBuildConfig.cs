@@ -19,7 +19,6 @@ namespace Loju.Build
         public string playerIconsPath = "Assets/UnityPlayer.iconset";
         public string provisioningProfileApplication = "3rd Party Mac Developer Application: DEVELOPER NAME";
         public string provisioningProfileInstaller = "3rd Party Mac Developer Installer: DEVELOPER NAME";
-        public string bundleSignature = "4 LETTER CREATOR CODE, e. g.:  GMAD";
 
         public MacAppStoreBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.StandaloneOSX, type, platformName, appendToPath, defines)
         {
@@ -53,16 +52,6 @@ namespace Loju.Build
             {
                 File.Copy(playerIconsPath, Path.Combine(pathToBuild, "Contents/Resources/PlayerIcon.icns"), true);
             }
-
-            // update info.plist
-            string infoPlistPath = Path.Combine(pathToBuild, "Contents/Info.plist");
-            PlistDocument info = new PlistDocument();
-            info.ReadFromFile(infoPlistPath);
-
-            PlistElementDict root = info.root;
-            root.SetString("CFBundleSignature", bundleSignature);
-
-            info.WriteToFile(infoPlistPath);
 
             // run terminal commands
             ProcessStartInfo startInfo = new ProcessStartInfo("/bin/bash");
