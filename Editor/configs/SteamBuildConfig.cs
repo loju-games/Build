@@ -9,18 +9,22 @@ namespace Loju.Build
     {
 
         public string depotId;
+        public string localPath = "*";
+        public string depotPath = ".";
+        public string recursive = "1";
+        public string[] fileExclusion = new string[] { "*.pdb" };
 
-        public SteamBuildConfig(string depotId, BuildTarget target, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(target, type, platformName, appendToPath, defines)
+        public SteamBuildConfig(string depotId, BuildTarget target, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(target, BuildTargetGroup.Standalone, type, platformName, appendToPath, defines)
         {
             this.depotId = depotId;
         }
 
-        public SteamBuildConfig(string depotId, BuildTarget target, string[] scenes, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(target, scenes, type, platformName, appendToPath, defines)
+        public SteamBuildConfig(string depotId, BuildTarget target, string[] scenes, BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(target, BuildTargetGroup.Standalone, scenes, type, platformName, appendToPath, defines)
         {
             this.depotId = depotId;
         }
 
-        public static void CreateBuildFiles(string appId, string outputPath, string buildDescription, string setBranchLive, params SteamBuildConfig[] configs)
+        public static string CreateBuildFiles(string appId, string outputPath, string buildDescription, string setBranchLive, bool preview, params SteamBuildConfig[] configs)
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("\"appbuild\"");
@@ -31,7 +35,7 @@ namespace Loju.Build
             stringBuilder.AppendLine("\t\"buildoutput\"	\".\\output\\\"");
             stringBuilder.AppendLine("\t\"contentroot\"	\".\\content\\\"");
             stringBuilder.AppendLine($"\t\"setlive\"	\"{setBranchLive}\"");
-            stringBuilder.AppendLine("\t\"preview\"	\"0\"");
+            stringBuilder.AppendLine($"\t\"preview\"	\"{(preview ? "1" : "0")}\"");
             stringBuilder.AppendLine("\t\"local\"	\"\"");
             stringBuilder.AppendLine("\t\"depots\"");
             stringBuilder.AppendLine("\t{");
@@ -50,7 +54,10 @@ namespace Loju.Build
             Directory.CreateDirectory(Path.Combine(outputPath, "content"));
             Directory.CreateDirectory(Path.Combine(outputPath, "output"));
 
-            File.WriteAllText(GetPathToAppVDF(outputPath, appId), stringBuilder.ToString());
+            string appVDFPath = GetPathToAppVDF(outputPath, appId);
+            File.WriteAllText(appVDFPath, stringBuilder.ToString());
+
+            return appVDFPath;
         }
 
         private static string CreateDepotVDF(SteamBuildConfig config, string outputPath)
@@ -68,11 +75,17 @@ namespace Loju.Build
             stringBuilder.AppendLine($"\t\"ContentRoot\"   \"{buildPath}\"");
             stringBuilder.AppendLine($"\t\"FileMapping\"");
             stringBuilder.AppendLine("\t{");
-            stringBuilder.AppendLine("\t\t\"LocalPath\" \"*\"");
-            stringBuilder.AppendLine("\t\t\"DepotPath\" \".\"");
-            stringBuilder.AppendLine("\t\t\"recursive\" \"1\"");
+            stringBuilder.AppendLine($"\t\t\"LocalPath\" \"{config.localPath}\"");
+            stringBuilder.AppendLine($"\t\t\"DepotPath\" \"{config.depotPath}\"");
+            stringBuilder.AppendLine($"\t\t\"recursive\" \"{config.recursive}\"");
             stringBuilder.AppendLine("\t}");
-            stringBuilder.AppendLine($"\t\"FileExclusion\"   \"*.pdb\"");
+
+            int i = 0, l = config.fileExclusion.Length;
+            for (; i < l; ++i)
+            {
+                stringBuilder.AppendLine($"\t\"FileExclusion\"   \"{config.fileExclusion[i]}\"");
+            }
+
             stringBuilder.AppendLine("}");
 
             File.WriteAllText(depotPath, stringBuilder.ToString());

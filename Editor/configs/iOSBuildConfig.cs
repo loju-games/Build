@@ -6,7 +6,7 @@ namespace Loju.Build
     public class iOSBuildConfig : BuildConfig
     {
 
-        public iOSBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.iOS, type, platformName, appendToPath, defines)
+        public iOSBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.iOS, BuildTargetGroup.iOS, type, platformName, appendToPath, defines)
         {
 
         }

@@ -20,7 +20,7 @@ namespace Loju.Build
         public string provisioningProfileApplication = "3rd Party Mac Developer Application: DEVELOPER NAME";
         public string provisioningProfileInstaller = "3rd Party Mac Developer Installer: DEVELOPER NAME";
 
-        public MacAppStoreBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.StandaloneOSX, type, platformName, appendToPath, defines)
+        public MacAppStoreBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.StandaloneOSX, BuildTargetGroup.Standalone, type, platformName, appendToPath, defines)
         {
 
         }

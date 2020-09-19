@@ -19,7 +19,7 @@ namespace Loju.Build
         public AndroidArchitecture buildArchitecture = AndroidArchitecture.All;
         public AndroidAPKBuildType apkBuildType = AndroidAPKBuildType.SingleAPK;
 
-        public AndroidBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.Android, type, platformName, appendToPath, defines)
+        public AndroidBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.Android, BuildTargetGroup.Android, type, platformName, appendToPath, defines)
         {
 
         }
