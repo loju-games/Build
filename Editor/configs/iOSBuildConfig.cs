@@ -6,9 +6,11 @@ namespace Loju.Build
     public class iOSBuildConfig : BuildConfig
     {
 
-        public iOSBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null) : base(BuildTarget.iOS, BuildTargetGroup.iOS, type, platformName, appendToPath, defines)
-        {
+        public bool append;
 
+        public iOSBuildConfig(BuildType type, string platformName, string appendToPath = null, BuildCompilationDefines defines = null, bool append = true) : base(BuildTarget.iOS, BuildTargetGroup.iOS, type, platformName, appendToPath, defines)
+        {
+            this.append = append;
         }
 
         public override void OnPreBuild(ref BuildOptions options)
@@ -16,7 +18,7 @@ namespace Loju.Build
             base.OnPreBuild(ref options);
 
             EditorUserBuildSettings.iOSBuildConfigType = type == BuildType.Debug ? iOSBuildType.Debug : iOSBuildType.Release;
-            options |= BuildOptions.AcceptExternalModificationsToPlayer;
+            if (append) options |= BuildOptions.AcceptExternalModificationsToPlayer;
         }
 
     }

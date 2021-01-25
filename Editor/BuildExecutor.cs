@@ -42,7 +42,15 @@ namespace Loju.Build
 
             // build
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, currentDefines.ToString());
-            BuildReport report = BuildPipeline.BuildPlayer(config.scenes, location, config.target, options);
+
+            BuildPlayerOptions buildOptions = new BuildPlayerOptions();
+            buildOptions.scenes = config.scenes;
+            buildOptions.locationPathName = location;
+            buildOptions.options = options;
+            buildOptions.target = config.target;
+            buildOptions.targetGroup = config.targetGroup;
+
+            BuildReport report = BuildPipeline.BuildPlayer(buildOptions);
 
             // cleanup
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, restoreDefines.ToString());
