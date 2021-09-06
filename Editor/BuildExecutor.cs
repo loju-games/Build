@@ -56,12 +56,12 @@ namespace Loju.Build
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildGroup, restoreDefines.ToString());
 
             config.OnPostBuild(location);
-            if (incrementBuildNumber) UpdateBuildNumber(config.target);
+            if (incrementBuildNumber) UpdateBuildNumber(config.target, config.targetGroup);
 
             return report;
         }
 
-        private static void UpdateBuildNumber(BuildTarget target)
+        private static void UpdateBuildNumber(BuildTarget target, BuildTargetGroup group)
         {
             // update internal build numbers
             if (target == BuildTarget.iOS)
@@ -72,9 +72,16 @@ namespace Loju.Build
             {
                 PlayerSettings.Android.bundleVersionCode = PlayerSettings.Android.bundleVersionCode + 1;
             }
-            else if (target == BuildTarget.StandaloneOSX)
+            else if (group == BuildTargetGroup.Standalone)
             {
-                PlayerSettings.macOS.buildNumber = (int.Parse(PlayerSettings.macOS.buildNumber) + 1).ToString();
+                string key = $"{Application.productName}_buildNumber";
+                int standaloneBuildNumber = EditorPrefs.GetInt(key, 0) + 1;
+                EditorPrefs.SetInt(key, standaloneBuildNumber);
+
+                if (target == BuildTarget.StandaloneOSX)
+                {
+                    PlayerSettings.macOS.buildNumber = standaloneBuildNumber.ToString();
+                }
             }
         }
 
@@ -90,9 +97,10 @@ namespace Loju.Build
             {
                 buildNumber = PlayerSettings.Android.bundleVersionCode.ToString();
             }
-            else if (config.target == BuildTarget.StandaloneOSX)
+            else if (config.targetGroup == BuildTargetGroup.Standalone)
             {
-                buildNumber = PlayerSettings.macOS.buildNumber;
+                string key = $"{Application.productName}_buildNumber";
+                buildNumber = EditorPrefs.GetInt(key, 0).ToString();
             }
 
             BuildInfo info = new BuildInfo(Application.version, buildNumber, config.platformName);
