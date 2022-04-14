@@ -104,6 +104,7 @@ namespace Loju.Build
             }
 
             BuildInfo info = new BuildInfo(Application.version, buildNumber, config.platformName);
+            if (!Directory.Exists(Application.streamingAssetsPath)) Directory.CreateDirectory(Application.streamingAssetsPath);
             File.WriteAllText(Path.Combine(Application.streamingAssetsPath, "version.json"), JsonUtility.ToJson(info));
         }
 

@@ -17,7 +17,11 @@ namespace Loju.Build
         {
             base.OnPreBuild(ref options);
 
-            EditorUserBuildSettings.iOSBuildConfigType = type == BuildType.Debug ? iOSBuildType.Debug : iOSBuildType.Release;
+#if UNITY_2021_1_OR_NEWER
+            EditorUserBuildSettings.iOSXcodeBuildConfig = type == BuildType.Debug ? XcodeBuildConfig.Debug : XcodeBuildConfig.Release;
+#else
+            //EditorUserBuildSettings.XcodeBuildConfig = type == BuildType.Debug ? XcodeBuildConfig.Debug : XcodeBuildConfig.Release;
+#endif
             if (append) options |= BuildOptions.AcceptExternalModificationsToPlayer;
         }
 
